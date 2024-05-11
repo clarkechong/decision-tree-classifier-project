@@ -1,4 +1,4 @@
-#include "tree-library.h"
+#include "../tree-library.h"
 #include <fstream>
 #include <cstdlib>
 

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "tree-library.h"
+#include "A3Tree.h"
 
 int main(){
  
@@ -30,17 +30,14 @@ int main(){
         {"a13480", "5", "4523", "a", "1"}
     };
  
-    A3Tree t1(input1);
-    A3Tree t2(input2);
- 
-    std::vector<std::string> q;
- 
-    q =  {"high", "yes", "moderate"};
-    std::cout << t1.query(q) << std::endl;
-    // this should print: acceptable
- 
-    q = {"B_34203", "9", "1343432", "a"};
-    std::cout << t2.query(q) << std::endl;
-    // this should print: a2
- 
+    //A3Tree t1(input1);
+    //A3Tree t2(input2);
+
+    //std::vector<std::string> q;
+    //q =  input1.at(1);
+
+    TreeNode* t = build_tree_root(input1.at(0).at(0));
+    construct_node_path(input1.at(0), input1.at(1), t);
+   
+    return 0;
 }

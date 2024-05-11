@@ -7,14 +7,14 @@ typedef std::string tree_t;
 
 struct TreeNode;
 struct EdgeNode;
+TreeNode* build_tree_root(tree_t e);
 TreeNode* allocate_tree_node(tree_t e);
 EdgeNode* cons_edge_node(TreeNode* t, EdgeNode* subtree_l);
-void print_tree(TreeNode* t);
-TreeNode* build_tree_root(tree_t e);
 TreeNode* find_node(tree_t e, TreeNode* t);
 void add_tree_node(tree_t s, tree_t d, TreeNode* t);
 int count_nodes(TreeNode* t);
 int count_leaf_nodes(TreeNode* t);
+void print_tree(TreeNode* t);
 void deallocate_tree(TreeNode* t);
 
 struct EdgeNode{
