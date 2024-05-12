@@ -30,14 +30,16 @@ int main(){
         {"a13480", "5", "4523", "a", "1"}
     };
 
-    std::vector<input_t> suckdick = generate_data_variations(input1);
- 
     A3Tree t1(input1);
     A3Tree t2(input2);
-
-    simplify_tree(t1.get_t());
-    std::cout << count_nodes(t1.get_t()) << std::endl;
-    std::cout << count_leaf_nodes(t1.get_t()) << std::endl;
-   
-    return 0;
+ 
+    std::vector<std::string> q;
+ 
+    q =  {"high", "yes", "moderate"};
+    std::cout << t1.query(q) << std::endl;
+    // this should print: acceptable
+ 
+    q = {"B_34203", "9", "1343432", "a"};
+    std::cout << t2.query(q) << std::endl;
+    // this should print: a2
 }

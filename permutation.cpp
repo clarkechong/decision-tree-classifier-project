@@ -1,6 +1,15 @@
 #include <vector>
 #include <iostream>
 
+void vprint(std::vector<std::vector<int>> v){
+    for(int i = 0; i < v.size(); i++){
+        for(int j = 0; j < v.at(i).size(); j++){
+            std::cout << v[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 void generate_permutations(int k, std::vector<int> &order, std::vector<std::vector<int>> &permutations){
     if(k == 1){
         permutations.push_back(order);
@@ -15,13 +24,15 @@ void generate_permutations(int k, std::vector<int> &order, std::vector<std::vect
 }
 
 int main(){
-    //std::vector<int> x = {1, 2, 3, 4};
-    //std::vector<std::vector<int>> results;
-    //generate_permutations(x.size(), x, results);
-
     std::vector<int> order;
-    for(int i = 0; i < 3; i++){ // generate tmp = {0, 1, 2}
+    int x = 6;
+    for(int i = 0; i < x; i++){ // generate tmp = {0, 1, 2, ... x-1}
         order.push_back(i);
     }
+
+    std::vector<std::vector<int>> results;
+    generate_permutations(order.size(), order, results);
+    vprint(results);
+
     return 0;
 }

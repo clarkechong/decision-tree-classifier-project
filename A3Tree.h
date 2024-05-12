@@ -8,22 +8,48 @@ EdgeNode* add_direct_edge_node(TreeNode* parent, tree_t value);
 TreeNode* add_direct_tree_node(EdgeNode* parent, tree_t value);
 TreeNode* add_branch(TreeNode* parent, tree_t edgeValue, tree_t childTreeValue);
 void construct_tree_from_data(TreeNode* root, std::vector<std::vector<std::string>> input);
+void simplify_tree(TreeNode* t);
+std::vector<input_t> generate_data_variations(input_t input);
+std::vector<int> obtain_modified_order(input_t initialDataset, input_t modifiedDataset);
+TreeNode* find_node_path(std::vector<std::string> path, TreeNode* root);
 
 
 class A3Tree {
     private:
         TreeNode* t;
+        input_t tDataset;
+        std::vector<int> tOrder;
+        std::vector<TreeNode*> treeVariations;
+        std::vector<input_t> dataVariations;
 
     public:
         A3Tree(std::vector<std::vector<std::string>> input){
-            t = build_tree_root(input.at(0).at(0));
-            construct_tree_from_data(t, input);
+            dataVariations = generate_data_variations(input);
+            for(int i = 0; i < dataVariations.size(); i++){
+                treeVariations.push_back(build_tree_root(dataVariations.at(i).at(0).at(0)));
+                construct_tree_from_data(treeVariations.at(i), dataVariations.at(i));
+                simplify_tree(treeVariations.at(i));
+                if(i == 0) {
+                    t = treeVariations.at(i);
+                    tDataset = dataVariations.at(i);
+                }
+                else if(count_nodes(treeVariations.at(i)) < count_nodes(t)) {
+                    t = treeVariations.at(i);
+                    tDataset = dataVariations.at(i);
+                    tOrder = obtain_modified_order(dataVariations.at(0), dataVariations.at(i));
+                }
+            }
         }
 
-        TreeNode* get_t() {return t;}
-
         std::string query(std::vector<std::string> q){
-            return 0;
+            if(tOrder.empty()) return find_node_path(q, t)->val; // if the category order of t is unchanged
+            else {
+                std::vector<std::string> tmp;
+                for(int i = 0; i < q.size(); i++){
+                    tmp.push_back(q.at(tOrder.at(i)));
+                }
+                return find_node_path(tmp, t)->val;
+            }
         }
 
         std::string node_count();
@@ -51,7 +77,7 @@ TreeNode* find_edgenode(tree_t e, TreeNode* parent){
     }
 }
 
-// returns the last existing node in path sequence. only applies to full unsimplified tree
+// returns the last existing node in path sequence
 TreeNode* find_node_path(std::vector<std::string> path, TreeNode* root){
     if(root == NULL) return NULL;
     TreeNode* tmp = root;
@@ -190,14 +216,30 @@ input_t switch_columns(std::vector<std::vector<std::string>> data, std::vector<i
 std::vector<input_t> generate_data_variations(input_t input) {
     std::vector<input_t> variations;
     std::vector<std::vector<int>> orderPermutations;
-    std::vector<int> order;
-    for(int i = 0; i < input.at(0).size()-1; i++){ // generate tmp = {0, 1, 2}
-        order.push_back(i);
+    std::vector<int> initialOrder;
+    for(int i = 0; i < input.at(0).size()-1; i++){ // generate tmp = {0, 1, 2, 3, ... etc}
+        initialOrder.push_back(i);
     }
-    generate_permutations(order.size(), order, orderPermutations); // orderPermutations holds all permutations of tmp
+    generate_permutations(initialOrder.size(), initialOrder, orderPermutations); // orderPermutations holds all permutations of tmp
     for(int i = 0; i < orderPermutations.size(); i++){
         input_t tmp = switch_columns(input, orderPermutations.at(i));
         variations.push_back(tmp);
     }
     return variations;
+}
+
+std::vector<int> obtain_modified_order(input_t initialDataset, input_t modifiedDataset){
+    std::vector<std::string> initial;
+    std::vector<std::string> modified;
+    std::vector<int> modifiedOrder;
+    for(int i = 0; i < initialDataset.at(0).size()-1; i++){
+        initial.push_back(initialDataset.at(0).at(i));
+        modified.push_back(modifiedDataset.at(0).at(i));
+    }
+    for(int i = 0; i < initial.size(); i++){
+        for(int j = 0; j < modified.size(); j++){
+            if(initial.at(i) == modified.at(j)) modifiedOrder.push_back(j);
+        }
+    }
+    return modifiedOrder;
 }
