@@ -30,15 +30,14 @@ int main(){
         {"a13480", "5", "4523", "a", "1"}
     };
 
-    std::vector<std::vector<std::string>> inputNew = transpose_data(input1);
-    std::swap(inputNew.at(0), inputNew.at(2));
-    input1 = transpose_data(inputNew);
-    
+    std::vector<input_t> suckdick = generate_data_variations(input1);
  
     A3Tree t1(input1);
     A3Tree t2(input2);
 
     simplify_tree(t1.get_t());
+    std::cout << count_nodes(t1.get_t()) << std::endl;
+    std::cout << count_leaf_nodes(t1.get_t()) << std::endl;
    
     return 0;
 }

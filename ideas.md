@@ -1,6 +1,5 @@
 - modified add node function which deconstructs sequence of nodes (i.e. no rain, high temp, strong wind) and uses the regular add node function to add one after the other
 have the parameter be a type vector so that the length is dynamic
-    - 
 
 - function that detects common nodes in trees
 used to simplify the tree

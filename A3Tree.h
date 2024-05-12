@@ -2,6 +2,8 @@
 #include <vector>
 #include "tree-library.h"
 
+typedef std::vector<std::vector<std::string>> input_t;
+
 EdgeNode* add_direct_edge_node(TreeNode* parent, tree_t value);
 TreeNode* add_direct_tree_node(EdgeNode* parent, tree_t value);
 TreeNode* add_branch(TreeNode* parent, tree_t edgeValue, tree_t childTreeValue);
@@ -153,4 +155,49 @@ std::vector<std::vector<std::string>> transpose_data(std::vector<std::vector<std
         }
     }
     return transposed;
+}
+
+void generate_permutations(int k, std::vector<int> &order, std::vector<std::vector<int>> &permutations){
+    if(k == 1){
+        permutations.push_back(order);
+    }
+    else {
+        for (int i = 0; i < k; i++) {
+			generate_permutations(k-1, order, permutations);
+			if(k % 2) std::swap(order.at(0), order.at(k-1));
+			else std::swap(order.at(i), order.at(k-1));
+		}
+    }
+}
+
+/// switches rows of the already transposed data according to specified order
+std::vector<std::vector<std::string>> switch_rows(std::vector<std::vector<std::string>> data, std::vector<int> order){
+    std::vector<std::vector<std::string>> tmp;
+    for(int i = 0; i < order.size(); i++){ // data.size() should be 1 greater than order.size() as "not a feature" row not switched
+        tmp.push_back(data.at(order.at(i)));
+    }
+    tmp.push_back(data.back());
+    return tmp;
+}
+
+input_t switch_columns(std::vector<std::vector<std::string>> data, std::vector<int> order){
+    input_t tmp = transpose_data(data);
+    tmp = switch_rows(tmp, order);
+    data = transpose_data(tmp);
+    return data;
+}
+
+std::vector<input_t> generate_data_variations(input_t input) {
+    std::vector<input_t> variations;
+    std::vector<std::vector<int>> orderPermutations;
+    std::vector<int> order;
+    for(int i = 0; i < input.at(0).size()-1; i++){ // generate tmp = {0, 1, 2}
+        order.push_back(i);
+    }
+    generate_permutations(order.size(), order, orderPermutations); // orderPermutations holds all permutations of tmp
+    for(int i = 0; i < orderPermutations.size(); i++){
+        input_t tmp = switch_columns(input, orderPermutations.at(i));
+        variations.push_back(tmp);
+    }
+    return variations;
 }
