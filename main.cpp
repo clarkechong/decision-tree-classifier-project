@@ -29,15 +29,16 @@ int main(){
         {"B_34203", "6", "4523", "a", "some_value"},
         {"a13480", "5", "4523", "a", "1"}
     };
+
+    std::vector<std::vector<std::string>> inputNew = transpose_data(input1);
+    std::swap(inputNew.at(0), inputNew.at(2));
+    input1 = transpose_data(inputNew);
+    
  
-    //A3Tree t1(input1);
-    //A3Tree t2(input2);
+    A3Tree t1(input1);
+    A3Tree t2(input2);
 
-    //std::vector<std::string> q;
-    //q =  input1.at(1);
-
-    TreeNode* t = build_tree_root(input1.at(0).at(0));
-    construct_node_path(input1.at(0), input1.at(1), t);
+    simplify_tree(t1.get_t());
    
     return 0;
 }

@@ -5,22 +5,22 @@
 EdgeNode* add_direct_edge_node(TreeNode* parent, tree_t value);
 TreeNode* add_direct_tree_node(EdgeNode* parent, tree_t value);
 TreeNode* add_branch(TreeNode* parent, tree_t edgeValue, tree_t childTreeValue);
+void construct_tree_from_data(TreeNode* root, std::vector<std::vector<std::string>> input);
+
 
 class A3Tree {
     private:
         TreeNode* t;
-        std::vector<TreeNode*> variations;
 
     public:
-        A3Tree(std::vector<std::vector<std::string>> input){ // constructor for initial tree
+        A3Tree(std::vector<std::vector<std::string>> input){
             t = build_tree_root(input.at(0).at(0));
+            construct_tree_from_data(t, input);
         }
 
-        TreeNode* get_t(){
-            return t;
-        }
+        TreeNode* get_t() {return t;}
 
-        std::string query(std::vector<std::string> q){ // query the result from a set of conditions
+        std::string query(std::vector<std::string> q){
             return 0;
         }
 
@@ -49,8 +49,7 @@ TreeNode* find_edgenode(tree_t e, TreeNode* parent){
     }
 }
 
-
-// returns the last existing node in path sequence. only applies for full unsimplified tree
+// returns the last existing node in path sequence. only applies to full unsimplified tree
 TreeNode* find_node_path(std::vector<std::string> path, TreeNode* root){
     if(root == NULL) return NULL;
     TreeNode* tmp = root;
@@ -67,7 +66,6 @@ void construct_node_path(std::vector<std::string> order, std::vector<std::string
     int depth = 0;
     for(int i = 0; i < order.size(); i++){
         if(existingPathNode->val == order.at(i)) depth = i;
-        std::cout << depth;
     }
     TreeNode* head = existingPathNode;
 
@@ -93,4 +91,66 @@ TreeNode* add_branch(TreeNode* parent, tree_t edgeValue, tree_t childTreeValue){
     EdgeNode* tmp = add_direct_edge_node(parent, edgeValue);
     tmp->subtree = add_direct_tree_node(tmp, childTreeValue);
     return tmp->subtree;
+}
+
+void construct_tree_from_data(TreeNode* root, std::vector<std::vector<std::string>> input){
+    for(int i = 1; i < input.size(); i++){
+        construct_node_path(input.at(0), input.at(i), root);
+    }
+}
+
+std::vector<TreeNode*> get_final_nodes(TreeNode* targetNode){
+    if(targetNode == NULL) return std::vector<TreeNode*>();
+    else if (targetNode->subtree_l == NULL){
+        return std::vector<TreeNode*>{targetNode};
+    }
+    else{
+        std::vector<TreeNode*> finalNodes;
+        EdgeNode* it = targetNode->subtree_l;
+        while(it != NULL){
+            std::vector<TreeNode*> tmp = get_final_nodes(it->subtree);
+            finalNodes.insert(finalNodes.end(), tmp.begin(), tmp.end());
+            it = it->next;
+        }
+        return finalNodes;
+    }
+}
+
+bool simplify_tree_node(TreeNode* targetNode){
+    std::vector<TreeNode*> finalNodes = get_final_nodes(targetNode);
+    std::vector<tree_t> finalNodesValues(finalNodes.size());
+    for(int i = 0; i < finalNodes.size(); i++){
+        finalNodesValues.at(i) = finalNodes.at(i)->val;
+    }
+    if(targetNode == NULL || finalNodes.empty()) return false; // should only occur if targetnode NULL
+    if(finalNodes.size() == 1 && targetNode == finalNodes.at(0)) return false; // false if targetnode IS the final node
+    else if(std::equal(finalNodesValues.begin()+1, finalNodesValues.end(), finalNodesValues.begin()) == true){
+        targetNode->val = finalNodes.at(0)->val;
+        targetNode->subtree_l = NULL;
+        return true;
+    }
+    else return false;
+}
+
+void simplify_tree(TreeNode* t){
+    if(t != NULL){
+        EdgeNode* it = t->subtree_l;
+        while(it != NULL){
+            simplify_tree(it->subtree);
+            it = it->next;
+        }
+        simplify_tree_node(t);
+    }
+}
+
+std::vector<std::vector<std::string>> transpose_data(std::vector<std::vector<std::string>> data){
+    int rows = data.size();
+    int columns = data.at(0).size();
+    std::vector<std::vector<std::string>> transposed(columns, std::vector<std::string>(rows));
+    for(int i = 0; i < rows; i++){
+        for(int j = 0; j < columns; j++){
+            transposed.at(j).at(i) = data.at(i).at(j);
+        }
+    }
+    return transposed;
 }

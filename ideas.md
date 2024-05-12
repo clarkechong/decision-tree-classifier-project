@@ -5,6 +5,11 @@ have the parameter be a type vector so that the length is dynamic
 - function that detects common nodes in trees
 used to simplify the tree
 then count the nodes in the simplified tree and compare to other tree variations
+    - how?:
+    for every node in the tree, check for condition that all the final nodes from that node are the same
+    if so, it can be simplified directly to that node
+    - have a modify node function that can alter the path following a certain node
+    - function that returns a list (vector) of the values of all the final nodes (i.e. the "not a feature" node)
 
 - function to swap the order of the variables (and hence create new tree variations to see which has less nodes after simplification)
     - how to implement this?:
