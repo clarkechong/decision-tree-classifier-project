@@ -246,15 +246,25 @@ std::vector<TreeNode*> get_final_nodes(TreeNode* targetNode){
 // it can be simplified by turning the target node itself into a final node with said same value
 // returns true if a simplification has been performed
 bool simplify_tree_node(TreeNode* targetNode){
+    if(targetNode == NULL) return false;
     std::vector<TreeNode*> finalNodes = get_final_nodes(targetNode);
+    if(finalNodes.empty()) return false;
     std::vector<tree_t> finalNodesValues(finalNodes.size());
     for(int i = 0; i < finalNodes.size(); i++){
         finalNodesValues.at(i) = finalNodes.at(i)->val;
     }
-    if(targetNode == NULL || finalNodes.empty()) return false; // should only occur if targetnode NULL
     if(finalNodes.size() == 1 && targetNode == finalNodes.at(0)) return false; // false if targetnode IS the final node
     else if(std::equal(finalNodesValues.begin()+1, finalNodesValues.end(), finalNodesValues.begin()) == true){
-        targetNode->val = finalNodes.at(0)->val;
+        // deallocate the subtree before setting subtree_l = NULL to avoid memory leak
+        EdgeNode* it = targetNode->subtree_l;
+        EdgeNode* tmp;
+        while(it != NULL){
+            deallocate_tree(it->subtree);
+            tmp = it;
+            it = it->next;
+            delete tmp;
+        }
+        targetNode->val = finalNodesValues.at(0);
         targetNode->subtree_l = NULL;
         return true;
     }
