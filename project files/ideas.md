@@ -29,3 +29,7 @@ count nodes
 store in array
 repeat for all order variations
 select tree with lowest node count
+
+/// EdgeNode* cons_edge_node(TreeNode* t, EdgeNode* subtree_l);
+/// void add_tree_node(tree_t s, tree_t d, TreeNode* t);
+/// void print_tree(TreeNode* t);

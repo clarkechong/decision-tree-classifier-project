@@ -41,8 +41,12 @@ class A3Tree {
             }
         }
 
+        ~A3Tree(){
+            deallocate_tree(t);
+        }
+
         std::string query(std::vector<std::string> q){
-            if(tOrder.empty()) return find_node_path(q, t)->val; // if the category order of t is unchanged
+            if(tOrder.empty()) return find_node_path(q, t)->val; // tOrder is empty if the category order of t is unchanged
             else {
                 std::vector<std::string> tmp;
                 for(int i = 0; i < q.size(); i++){
@@ -52,10 +56,15 @@ class A3Tree {
             }
         }
 
-        std::string node_count();
-        std::string leaf_node_count();
+        std::string node_count(){
+            return std::to_string(count_nodes(t));
+        }
+        std::string leaf_node_count(){
+            return std::to_string(count_leaf_nodes(t));
+        }
 };
 
+// allocates and returns pointer to edgenode assigned with specified values
 EdgeNode* cons_edge_node(TreeNode* t, EdgeNode* subtree_l, tree_t value){
     EdgeNode* tmp = new EdgeNode;
     tmp->subtree = t;
@@ -64,7 +73,7 @@ EdgeNode* cons_edge_node(TreeNode* t, EdgeNode* subtree_l, tree_t value){
     return tmp;
 }
 
-// searches direct children and returns treenode of target edgenode or NULL if not found
+// searches direct children of parent. returns treenode of the target edgenode, or NULL if not found
 TreeNode* find_edgenode(tree_t e, TreeNode* parent){
     if(parent == NULL) return NULL;
     else {
@@ -77,7 +86,7 @@ TreeNode* find_edgenode(tree_t e, TreeNode* parent){
     }
 }
 
-// returns the last existing node in path sequence
+// returns the last existing node in the queried path sequence. if no match, returns the root node
 TreeNode* find_node_path(std::vector<std::string> path, TreeNode* root){
     if(root == NULL) return NULL;
     TreeNode* tmp = root;
@@ -89,6 +98,7 @@ TreeNode* find_node_path(std::vector<std::string> path, TreeNode* root){
     return buffer;
 }
 
+// constructs node path following from the last existing node in the specified path
 void construct_node_path(std::vector<std::string> order, std::vector<std::string> path, TreeNode* root){
     TreeNode* existingPathNode = find_node_path(path, root);
     int depth = 0;
@@ -105,28 +115,34 @@ void construct_node_path(std::vector<std::string> order, std::vector<std::string
 
 }
 
+// directly assigns and returns edge node of specified value to the specified parent node. inserts to the start of the existing edgenode list
 EdgeNode* add_direct_edge_node(TreeNode* parent, tree_t value){
     parent->subtree_l = cons_edge_node(NULL, parent->subtree_l, value);
     return parent->subtree_l;
 }
 
+// directly assigns and returns tree node of specified value to the specified parent edgenode.
 TreeNode* add_direct_tree_node(EdgeNode* parent, tree_t value){
     parent->subtree = allocate_tree_node(value);
     return parent->subtree;
 }
 
+// adds an edgenode -> treenode to an existing parent treenode. 
 TreeNode* add_branch(TreeNode* parent, tree_t edgeValue, tree_t childTreeValue){
     EdgeNode* tmp = add_direct_edge_node(parent, edgeValue);
     tmp->subtree = add_direct_tree_node(tmp, childTreeValue);
     return tmp->subtree;
 }
 
+// iterates through the input dataset and constructs each path onto the root
 void construct_tree_from_data(TreeNode* root, std::vector<std::vector<std::string>> input){
     for(int i = 1; i < input.size(); i++){
         construct_node_path(input.at(0), input.at(i), root);
     }
 }
 
+// returns a vector list of all the final nodes stemming from a specified target node (i.e. the "not a feature" nodes)
+// operates recursively; if the queried node is itself a final node, it returns itself
 std::vector<TreeNode*> get_final_nodes(TreeNode* targetNode){
     if(targetNode == NULL) return std::vector<TreeNode*>();
     else if (targetNode->subtree_l == NULL){
@@ -144,6 +160,9 @@ std::vector<TreeNode*> get_final_nodes(TreeNode* targetNode){
     }
 }
 
+// if all the final nodes stemming from a target node have the same value
+// it can be simplified by turning the target node itself into a final node with said same value
+// returns true if a simplification has been performed
 bool simplify_tree_node(TreeNode* targetNode){
     std::vector<TreeNode*> finalNodes = get_final_nodes(targetNode);
     std::vector<tree_t> finalNodesValues(finalNodes.size());
@@ -160,6 +179,7 @@ bool simplify_tree_node(TreeNode* targetNode){
     else return false;
 }
 
+// recursively simplifies the tree stemming from a specified (root) node
 void simplify_tree(TreeNode* t){
     if(t != NULL){
         EdgeNode* it = t->subtree_l;
@@ -171,6 +191,7 @@ void simplify_tree(TreeNode* t){
     }
 }
 
+// transposes dataset for easier manipulation when swapping order of categories
 std::vector<std::vector<std::string>> transpose_data(std::vector<std::vector<std::string>> data){
     int rows = data.size();
     int columns = data.at(0).size();
@@ -183,6 +204,7 @@ std::vector<std::vector<std::string>> transpose_data(std::vector<std::vector<std
     return transposed;
 }
 
+// generates all permutations of a list using Heap's algorithm
 void generate_permutations(int k, std::vector<int> &order, std::vector<std::vector<int>> &permutations){
     if(k == 1){
         permutations.push_back(order);
@@ -196,16 +218,19 @@ void generate_permutations(int k, std::vector<int> &order, std::vector<std::vect
     }
 }
 
-/// switches rows of the already transposed data according to specified order
+// switches rows of the (already transposed) data according to specified order
+// does not involve switching the last row as this is the "not a feature" row
 std::vector<std::vector<std::string>> switch_rows(std::vector<std::vector<std::string>> data, std::vector<int> order){
     std::vector<std::vector<std::string>> tmp;
-    for(int i = 0; i < order.size(); i++){ // data.size() should be 1 greater than order.size() as "not a feature" row not switched
+    for(int i = 0; i < order.size(); i++){
         tmp.push_back(data.at(order.at(i)));
     }
     tmp.push_back(data.back());
     return tmp;
 }
 
+// combines switch_rows and transpose_data to switch the order of the categories in the data (i.e. the columns)
+// does not switch the last "not a feature" column
 input_t switch_columns(std::vector<std::vector<std::string>> data, std::vector<int> order){
     input_t tmp = transpose_data(data);
     tmp = switch_rows(tmp, order);
@@ -213,6 +238,7 @@ input_t switch_columns(std::vector<std::vector<std::string>> data, std::vector<i
     return data;
 }
 
+// generate all possible permutations of the initial data by switching the order of the categories
 std::vector<input_t> generate_data_variations(input_t input) {
     std::vector<input_t> variations;
     std::vector<std::vector<int>> orderPermutations;
@@ -228,6 +254,7 @@ std::vector<input_t> generate_data_variations(input_t input) {
     return variations;
 }
 
+// obtain the switched order of categories of a specified modified dataset
 std::vector<int> obtain_modified_order(input_t initialDataset, input_t modifiedDataset){
     std::vector<std::string> initial;
     std::vector<std::string> modified;
