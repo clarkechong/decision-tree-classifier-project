@@ -81,15 +81,20 @@ int main(){
     A3Tree t1(input1);
     A3Tree t2(input2);
  
-    std::vector<std::string> q;
+    std::vector<std::string> query;
  
-    q =  {"high", "yes", "moderate"};
-    std::cout << t1.query(q) << std::endl;
-    // this should print: acceptable
+    query =  {"high", "yes", "moderate"};
+    std::cout << t1.query(query) << std::endl;
+    // expect: `acceptable`
  
-    q = {"B_34203", "9", "1343432", "a"};
-    std::cout << t2.query(q) << std::endl;
-    // this should print: a2
+    query = {"B_34203", "9", "1343432", "a"};
+    std::cout << t2.query(query) << std::endl;
+    // expect: `a2`
+
+    /*
+    assign an appropriate query to test either tree 1 (t1) or tree 2 (t2)
+    or design your own database to construct and query
+    */
 
     return 0;
 }
